@@ -9,7 +9,7 @@
 		<key>icon</key>
 		<string>SSLKillSwitchCallee.png</string>
 		<key>label</key>
-		<string>SSL Kill Switch 2</string>
+		<string>SSL Kill Switch Callee</string>
 	</dict>
 	<key>items</key>
 	<array>
@@ -19,7 +19,7 @@
 			<key>label</key>
 			<string></string>
 			<key>footerText</key>
-			<string>SSL Kill Switch 2</string>
+			<string>SSL Kill Switch Callee</string>
 		</dict>
 		<dict>
 			<key>cell</key>

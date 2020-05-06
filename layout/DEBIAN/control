@@ -1,7 +1,7 @@
 Package: com.nablac0d3.sslkillswitchcallee
 Name: SSL Kill Switch Callee
 Depends: mobilesubstrate, preferenceloader
-Version: 0.1
+Version: 0.2
 Architecture: iphoneos-arm
 Description: calee test1
 Maintainer: Callee <nabla.c0d3@gmail.com>
