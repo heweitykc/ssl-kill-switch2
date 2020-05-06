@@ -2,7 +2,7 @@ ARCHS := arm64
 
 include theos/makefiles/common.mk
 
-TWEAK_NAME = SSLKillSwitch2
+TWEAK_NAME = SSLKillSwitchCallee
 SSLKillSwitch2_FILES = SSLKillSwitch/SSLKillSwitch.m
 
 SSLKillSwitch2_FRAMEWORKS = Security
