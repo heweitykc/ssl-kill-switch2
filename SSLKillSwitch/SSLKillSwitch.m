@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Alban Diquet. All rights reserved.
 //
 
+#import <CoreFoundation/CoreFoundation.h>
 #import <Foundation/Foundation.h>
 #import <Security/SecureTransport.h>
 
@@ -17,7 +18,6 @@
 
 #else
 
-#import "fishhook.h"
 #import <dlfcn.h>
 
 #endif
@@ -34,6 +34,23 @@ static void SSKLog(NSString *format, ...)
     va_end(args);
 }
 
+
+void LogData(const void *data, size_t dataLength)
+{
+    NSString *str = [NSString stringWithFormat:@"\n"];
+    NSMutableData *dat = [NSMutableData dataWithData:[str dataUsingEncoding:NSUTF8StringEncoding]];
+	[dat appendBytes:data length:dataLength];
+
+	// NSString *txt = [[NSString alloc] initWithBytesNoCopy:(void *)data length:dataLength encoding:NSUTF8StringEncoding freeWhenDone:NO];
+	// if (txt) SSKLog(@"%@\n\n", txt);
+
+    NSString* path = @"/tmp/peek.log";
+    NSFileHandle *fh = [NSFileHandle fileHandleForWritingAtPath:path];
+    [fh truncateFileAtOffset:[fh seekToEndOfFile]];
+    [fh writeData:dat];
+
+    //[dat writeToFile:path atomically:NO];
+}
 
 #if SUBSTRATE_BUILD
 // Utility function to read the Tweak's preferences
@@ -181,6 +198,14 @@ static void replaced_SSL_set_custom_verify(void *ssl, int mode, int (*callback)(
     return;
 }
 
+static int (*original_SSL_read)(void *ssl, void *buf, int num);
+int replaced_SSL_read(void *ssl, void *buf, int num)
+{
+    SSKLog(@"Entering replaced_SSL_read()");
+    int ret = original_SSL_read(ssl, buf, num);
+    LogData(buf, num);
+    return ret;
+}
 
 #pragma mark CocoaSPDY hook
 #if SUBSTRATE_BUILD
@@ -215,7 +240,6 @@ static void newRegisterOrigin(id self, SEL _cmd, NSString *origin)
 
 __attribute__((constructor)) static void init(int argc, const char **argv)
 {
-#if SUBSTRATE_BUILD
     // Substrate-based hooking; only hook if the preference file says so
     if (shouldHookFromPreference(PREFERENCE_KEY))
     {
@@ -237,6 +261,10 @@ __attribute__((constructor)) static void init(int argc, const char **argv)
                     SSKLog(@"Hooking SSL_set_custom_verify()...");
                     MSHookFunction((void *) SSL_set_custom_verify, (void *) replaced_SSL_set_custom_verify,  (void **) &original_SSL_set_custom_verify);
                 }
+
+                void *SSL_read = dlsym(boringssl_handle, "SSL_read");
+                SSKLog(@"Hooking SSL_read()...");
+                MSHookFunction((void *) SSL_read, (void *) replaced_SSL_read,  (void **)&original_SSL_read);
             }
             else
             {
@@ -305,32 +333,4 @@ __attribute__((constructor)) static void init(int argc, const char **argv)
     {
         SSKLog(@"Substrate hook disabled.");
     }
-
-#else
-    // Fishhook-based hooking, for OS X builds; always hook
-    SSKLog(@"Fishhook hook enabled.");
-    original_SSLHandshake = dlsym(RTLD_DEFAULT, "SSLHandshake");
-    if ((rebind_symbols((struct rebinding[1]){{(char *)"SSLHandshake", (void *)replaced_SSLHandshake}}, 1) < 0))
-    {
-        SSKLog(@"Hooking failed.");
-    }
-
-    original_SSLSetSessionOption = dlsym(RTLD_DEFAULT, "SSLSetSessionOption");
-    if ((rebind_symbols((struct rebinding[1]){{(char *)"SSLSetSessionOption", (void *)replaced_SSLSetSessionOption}}, 1) < 0))
-    {
-        SSKLog(@"Hooking failed.");
-    }
-
-    original_SSLCreateContext = dlsym(RTLD_DEFAULT, "SSLCreateContext");
-    if ((rebind_symbols((struct rebinding[1]){{(char *)"SSLCreateContext", (void *)replaced_SSLCreateContext}}, 1) < 0))
-    {
-        SSKLog(@"Hooking failed.");
-    }
-
-    original_tls_helper_create_peer_trust = dlsym(RTLD_DEFAULT, "tls_helper_create_peer_trust");
-    if ((rebind_symbols((struct rebinding[1]){{(char *)"tls_helper_create_peer_trust", (void *)replaced_tls_helper_create_peer_trust}}, 1) < 0))
-    {
-        SSKLog(@"Hooking failed.");
-    }
-#endif
 }

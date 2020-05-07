@@ -21,7 +21,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>callee</string>
+	<string>Copyright © 2015 nablac0d3. All rights reserved.</string>
 	<key>NSPrincipalClass</key>
 	<string></string>
 </dict>

@@ -7,9 +7,9 @@
 		<key>cell</key>
 		<string>PSLinkCell</string>
 		<key>icon</key>
-		<string>SSLKillSwitchCallee.png</string>
+		<string>SSLKillSwitch.png</string>
 		<key>label</key>
-		<string>SSL Kill Switch Callee</string>
+		<string>SSL Kill Switch 2</string>
 	</dict>
 	<key>items</key>
 	<array>
@@ -19,7 +19,7 @@
 			<key>label</key>
 			<string></string>
 			<key>footerText</key>
-			<string>SSL Kill Switch Callee</string>
+			<string>SSL Kill Switch 2</string>
 		</dict>
 		<dict>
 			<key>cell</key>
